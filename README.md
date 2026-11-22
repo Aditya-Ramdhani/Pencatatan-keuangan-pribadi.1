@@ -3,7 +3,6 @@
 Aplikasi Web Pencatatan Keuangan Pribadi yang Cepat, Terstruktur, dan Visual sesuai spesifikasi **Product Requirements Document (PRD)**.
 
 ---
-
 ## 🚀 Fitur Utama
 
 ### 1. Autentikasi & Manajemen Sesi (F-01)

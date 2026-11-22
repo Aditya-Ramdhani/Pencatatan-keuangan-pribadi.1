@@ -140,17 +140,17 @@ export function TransactionModal({
         if (onSuccess) onSuccess();
       }
     } catch {
-      setError("Terjadi kesalahan sistem.");
+      setError("Terjadi kesalahan sistem saat menyimpan transaksi.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-base sm:text-lg font-bold text-slate-800">
             {initialData ? "Edit Transaksi" : "Catat Transaksi"}
           </h2>
           <button
@@ -162,28 +162,28 @@ export function TransactionModal({
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm rounded-xl">
               {error}
             </div>
           )}
 
           {/* Type Selector Tabs */}
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-2xl">
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl">
             <button
               type="button"
               onClick={() => {
                 setType("EXPENSE");
                 setCategoryId("");
               }}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
                 type === "EXPENSE"
                   ? "bg-red-500 text-white shadow-md shadow-red-500/20"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <ArrowDownRight className="w-4 h-4" />
+              <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Pengeluaran</span>
             </button>
             <button
@@ -192,13 +192,13 @@ export function TransactionModal({
                 setType("INCOME");
                 setCategoryId("");
               }}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
                 type === "INCOME"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Pemasukan</span>
             </button>
             <button
@@ -207,13 +207,13 @@ export function TransactionModal({
                 setType("TRANSFER");
                 setCategoryId("");
               }}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all ${
                 type === "TRANSFER"
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <ArrowRightLeft className="w-4 h-4" />
+              <ArrowRightLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Transfer</span>
             </button>
           </div>
@@ -224,7 +224,7 @@ export function TransactionModal({
               Nominal (Rp)
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-base sm:text-lg">
                 Rp
               </span>
               <input
@@ -234,7 +234,7 @@ export function TransactionModal({
                 value={amountStr ? Number(rawAmount).toLocaleString("id-ID") : ""}
                 onChange={(e) => setAmountStr(e.target.value)}
                 placeholder="0"
-                className="w-full pl-12 pr-4 py-3 text-2xl font-bold rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 placeholder:text-slate-300"
+                className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-xl sm:text-2xl font-bold rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 placeholder:text-slate-300"
               />
             </div>
             {rawAmount > 0 && (
@@ -246,7 +246,7 @@ export function TransactionModal({
 
           {/* Wallets */}
           {type === "TRANSFER" ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
                   Dari Dompet
@@ -254,7 +254,7 @@ export function TransactionModal({
                 <select
                   value={walletId}
                   onChange={(e) => setWalletId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 bg-white"
                 >
                   <option value="">Pilih Asal</option>
                   {wallets.map((w) => (
@@ -271,7 +271,7 @@ export function TransactionModal({
                 <select
                   value={toWalletId}
                   onChange={(e) => setToWalletId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 bg-white"
                 >
                   <option value="">Pilih Tujuan</option>
                   {wallets
@@ -292,7 +292,7 @@ export function TransactionModal({
               <select
                 value={walletId}
                 onChange={(e) => setWalletId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 bg-white"
               >
                 {wallets.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -311,10 +311,10 @@ export function TransactionModal({
               </label>
               {availableCategories.length === 0 ? (
                 <p className="text-xs text-amber-600 bg-amber-50 p-2.5 rounded-xl">
-                  Belum ada kategori untuk jenis ini. Tambahkan kategori baru di menu Kategori.
+                  Belum ada kategori untuk jenis ini.
                 </p>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 sm:gap-2 max-h-36 sm:max-h-40 overflow-y-auto p-1">
                   {availableCategories.map((c) => {
                     const isSelected = categoryId === c.id;
                     return (
@@ -322,19 +322,19 @@ export function TransactionModal({
                         type="button"
                         key={c.id}
                         onClick={() => setCategoryId(c.id)}
-                        className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border text-center transition-all ${
+                        className={`flex flex-col items-center justify-center p-2 rounded-2xl border text-center transition-all ${
                           isSelected
                             ? "border-emerald-600 bg-emerald-50/80 ring-2 ring-emerald-500/30 text-emerald-900"
                             : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
                         }`}
                       >
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center mb-1 text-white"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center mb-1 text-white"
                           style={{ backgroundColor: c.color }}
                         >
-                          <CategoryIcon name={c.icon} size={16} />
+                          <CategoryIcon name={c.icon} size={15} />
                         </div>
-                        <span className="text-[11px] font-medium leading-tight truncate w-full">
+                        <span className="text-[10px] sm:text-[11px] font-medium leading-tight truncate w-full">
                           {c.name}
                         </span>
                       </button>
@@ -356,7 +356,7 @@ export function TransactionModal({
                 required
                 value={transactionDate}
                 onChange={(e) => setTransactionDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
               />
             </div>
             <div>
@@ -367,8 +367,8 @@ export function TransactionModal({
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Contoh: Makan siang nasi padang"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
+                placeholder="Contoh: Makan siang"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800"
               />
             </div>
           </div>
@@ -378,11 +378,11 @@ export function TransactionModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-70"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-70 text-sm"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Menyimpan Transaksi...</span>
                 </>
               ) : (
@@ -395,4 +395,3 @@ export function TransactionModal({
     </div>
   );
 }
-
