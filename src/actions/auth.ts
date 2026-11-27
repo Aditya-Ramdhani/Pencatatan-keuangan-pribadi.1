@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { hashPassword, comparePassword, setSessionCookie, clearSessionCookie, getSession } from "@/lib/auth";
-import { registerSchema, loginSchema } from "@/lib/validations";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validations";
 import { redirect } from "next/navigation";
 
 // Kategori default yang langsung di-seed untuk setiap pengguna baru
@@ -48,6 +48,7 @@ export async function registerAction(formData: unknown) {
           name,
           email: email.toLowerCase(),
           passwordHash,
+          failedAttempts: 0,
         },
       });
 
@@ -106,9 +107,66 @@ export async function loginAction(formData: unknown) {
       return { error: "Email atau password salah." };
     }
 
+    // 1. Cek apakah akun sedang terkunci karena salah 5 kali
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const minutesLeft = Math.ceil(
+        (user.lockedUntil.getTime() - Date.now()) / (60 * 1000)
+      );
+      return {
+        error: `Akun Anda terkunci sementara karena salah password 5 kali berturut-turut. Silakan coba lagi dalam ${minutesLeft} menit atau reset password Anda.`,
+        isLocked: true,
+        failedAttempts: user.failedAttempts,
+      };
+    }
+
+    // 2. Cek kecocokan password
     const isValid = await comparePassword(password, user.passwordHash);
+
     if (!isValid) {
-      return { error: "Email atau password salah." };
+      const currentAttempts = (user.failedAttempts || 0) + 1;
+
+      if (currentAttempts >= 5) {
+        // Kunci akun selama 15 menit
+        const lockDuration = new Date(Date.now() + 15 * 60 * 1000);
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            failedAttempts: currentAttempts,
+            lockedUntil: lockDuration,
+          },
+        });
+
+        return {
+          error:
+            "Anda telah salah memasukkan password sebanyak 5 kali. Akun Anda terkunci sementara selama 15 menit untuk alasan keamanan. Silakan gunakan opsi Reset Password di bawah.",
+          isLocked: true,
+          failedAttempts: currentAttempts,
+        };
+      } else {
+        // Catat jumlah kesalahan
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { failedAttempts: currentAttempts },
+        });
+
+        const remaining = 5 - currentAttempts;
+        return {
+          error: `Email atau password salah. (Peringatan: Sisa kesempatan mencoba ${remaining} kali sebelum akun terkunci).`,
+          failedAttempts: currentAttempts,
+          isLocked: false,
+        };
+      }
+    }
+
+    // 3. Login sukses: Reset counter kesalahan
+    if (user.failedAttempts > 0 || user.lockedUntil) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedAttempts: 0,
+          lockedUntil: null,
+        },
+      });
     }
 
     await setSessionCookie({
@@ -122,6 +180,93 @@ export async function loginAction(formData: unknown) {
   }
 
   redirect("/dashboard");
+}
+
+export async function requestPasswordResetAction(formData: unknown) {
+  const parsed = forgotPasswordSchema.safeParse(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Format email tidak valid" };
+  }
+
+  const { email } = parsed.data;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      return { error: "Alamat email tidak ditemukan dalam sistem." };
+    }
+
+    // Buat kode verifikasi 6 digit acak
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 menit
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetCode: code,
+        resetCodeExpires: expiresAt,
+      },
+    });
+
+    return {
+      success: true,
+      email: user.email,
+      code, // Disediakan juga di response agar verifikasi bisa dilakukan langsung tanpa terhalang settingan SMTP
+      message: "Kode verifikasi 6 digit telah berhasil dibuat.",
+    };
+  } catch (error) {
+    console.error("Request reset error:", error);
+    return { error: "Gagal memproses permintaan reset password." };
+  }
+}
+
+export async function resetPasswordAction(formData: unknown) {
+  const parsed = resetPasswordSchema.safeParse(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Data tidak valid" };
+  }
+
+  const { email, code, password } = parsed.data;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      return { error: "Pengguna tidak ditemukan." };
+    }
+
+    if (!user.resetCode || user.resetCode !== code) {
+      return { error: "Kode verifikasi salah. Silakan periksa kembali kode Anda." };
+    }
+
+    if (!user.resetCodeExpires || user.resetCodeExpires < new Date()) {
+      return { error: "Kode verifikasi telah kedaluwarsa. Silakan minta kode baru." };
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    // Reset password & buka kembali akun jika terkunci
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        failedAttempts: 0,
+        lockedUntil: null,
+        resetCode: null,
+        resetCodeExpires: null,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return { error: "Gagal memperbarui password." };
+  }
 }
 
 export async function logoutAction() {
@@ -143,4 +288,3 @@ export async function getCurrentUser() {
     return null;
   }
 }
-

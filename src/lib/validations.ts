@@ -11,6 +11,16 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password wajib diisi"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Format email tidak valid"),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email("Format email tidak valid"),
+  code: z.string().min(6, "Kode verifikasi 6 digit").max(6, "Kode verifikasi 6 digit"),
+  password: z.string().min(6, "Password baru minimal 6 karakter"),
+});
+
 export const walletSchema = z.object({
   name: z.string().min(1, "Nama dompet wajib diisi"),
   type: z.enum(["CASH", "BANK", "EWALLET", "OTHER"]),
@@ -40,4 +50,3 @@ export const budgetSchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}$/, "Format bulan harus YYYY-MM"),
   amount: z.number().positive("Batas anggaran harus lebih dari 0"),
 });
-
